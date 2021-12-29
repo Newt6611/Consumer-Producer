@@ -30,7 +30,7 @@ public:
         int data = queue.front();
         queue.pop_front();
         
-        cond_var.notify_all();
+        cond_var.notify_one();
         
         return data;
     }
@@ -45,27 +45,31 @@ private:
 
 std::mutex printmu;
 void Producer(int id, QueueBuffer& buffer) {
-    for (int i=0; i<20; ++i) {
+    for (int i=0; i<60; ++i) {
         
         printmu.lock();
         std::cout << "p " << id << " Produce " << i << std::endl;
         printmu.unlock();
         
         buffer.Produce(i);
-        std::this_thread::sleep_for(std::chrono::milliseconds(1000));
+        std::this_thread::sleep_for(std::chrono::milliseconds(100));
     }
+    
+    std::cout << "Producer " << id << "Done" << std::endl;
 }
 
 void Consumer(int id, QueueBuffer& buffer) {
-    for (int i=0; i<20; ++i) {
+    for (int i=0; i<60; ++i) {
         int value = buffer.Consume();
         
         printmu.lock();
         std::cout << "c " << id << " Consumer " << value << std::endl;
         printmu.unlock();
         
-        std::this_thread::sleep_for(std::chrono::milliseconds(2000));
+        std::this_thread::sleep_for(std::chrono::milliseconds(200));
     }
+    
+    std::cout << "Consumer " << id << "Done" << std::endl;
 }
 
 int main() {
@@ -73,14 +77,14 @@ int main() {
     
     std::thread producer1(Producer, 1, std::ref(buffer));
     std::thread producer2(Producer, 2, std::ref(buffer));
-    std::thread producer3(Producer, 3, std::ref(buffer));
+    //std::thread producer3(Producer, 3, std::ref(buffer));
     
     std::thread consumer1(Consumer, 1, std::ref(buffer));
     std::thread consumer2(Consumer, 2, std::ref(buffer));
     
     producer1.join();
     producer2.join();
-    producer3.join();
+    //producer3.join();
     
     consumer1.join();
     consumer2.join();
