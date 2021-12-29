@@ -77,14 +77,12 @@ int main() {
     
     std::thread producer1(Producer, 1, std::ref(buffer));
     std::thread producer2(Producer, 2, std::ref(buffer));
-    //std::thread producer3(Producer, 3, std::ref(buffer));
     
     std::thread consumer1(Consumer, 1, std::ref(buffer));
     std::thread consumer2(Consumer, 2, std::ref(buffer));
     
     producer1.join();
     producer2.join();
-    //producer3.join();
     
     consumer1.join();
     consumer2.join();
